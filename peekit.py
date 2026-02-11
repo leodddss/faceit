@@ -1,10 +1,20 @@
 import elo
 
 class PeekitMatchService:
+    """Service for managing match ratings and rank calculation."""
+    
     _elo_system = elo.Elo(k_factor=32)
+
+    def __init__(self, match_id: str):
+        self.match_id = match_id
+
+    def get_match_tag(self):
+        """Returns the specific match identifier."""
+        return f"Match ID: {self.match_id}"
 
     @staticmethod
     def get_rank_level(elo_points: int) -> int:
+        """Determines rank level based on Elo points."""
         match elo_points:
             case p if p <= 500: return 1
             case p if p <= 750: return 2
@@ -19,6 +29,7 @@ class PeekitMatchService:
 
     @classmethod
     def calculate_team_match(cls, team_ct_elo: list[int], team_t_elo: list[int], winner: str):
+        """Calculates Elo change for a team-based match."""
         avg_ct = sum(team_ct_elo) / len(team_ct_elo)
         avg_t = sum(team_t_elo) / len(team_t_elo)
 
@@ -36,10 +47,14 @@ if __name__ == "__main__":
     ct_team = [1000, 1050, 980, 1020, 1100]
     t_team = [1000, 950, 1010, 990, 1050]
 
-    service = PeekitMatchService()
-    
-    ct_change, t_change = service.calculate_team_match(ct_team, t_team, "CT")
-    
+    # Instance Method: требует инициализации
+    service = PeekitMatchService(match_id="BS-9912")
+    print(service.get_match_tag())
+
+    # Class Method: вызывается через класс
+    ct_change, t_change = PeekitMatchService.calculate_team_match(ct_team, t_team, "CT")
     print(f"CT Change: {ct_change:+}")
     print(f"T Change: {t_change:+}")
-    print(f"Rank for 1450 Elo: {service.get_rank_level(1450)}")
+
+    # Static Method: вызывается через класс
+    print(f"Rank for 1450 Elo: {PeekitMatchService.get_rank_level(1450)}")
