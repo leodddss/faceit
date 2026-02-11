@@ -24,9 +24,9 @@ class PeekitMatchService:
 
         match winner:
             case "CT":
-                new_ct, new_t = cls._elo_system.rate_1vs1(avg_ct, avg_t)
+                new_ct, new_t = cls._elo_system.rate_5vs5(avg_ct, avg_t)
             case "T":
-                new_t, new_ct = cls._elo_system.rate_1vs1(avg_t, avg_ct)
+                new_t, new_ct = cls._elo_system.rate_5vs5(avg_t, avg_ct)
             case _:
                 return None
 
