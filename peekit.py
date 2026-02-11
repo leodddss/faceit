@@ -1,25 +1,45 @@
 import elo
 
-peekit_elo = elo.Elo(k_factor=32)
+class PeekitMatchService:
+    _elo_system = elo.Elo(k_factor=32)
 
-def calculate_new_ranks(winner_elo, loser_elo):
-    new_winner_elo, new_loser_elo = peekit_elo.rate_1vs1(winner_elo, loser_elo)
-    return round(new_winner_elo), round(new_loser_elo)
+    @staticmethod
+    def get_rank_level(elo_points: int) -> int:
+        match elo_points:
+            case p if p <= 500: return 1
+            case p if p <= 750: return 2
+            case p if p <= 1000: return 3
+            case p if p <= 1250: return 4
+            case p if p <= 1500: return 5
+            case p if p <= 1750: return 6
+            case p if p <= 2000: return 7
+            case p if p <= 2300: return 8
+            case p if p <= 2600: return 9
+            case _: return 10
 
-def get_rank_level(elo_points):
-    if elo_points <= 500: return 1
-    if elo_points <= 750: return 2
-    if elo_points <= 1000: return 3
-    if elo_points <= 1250: return 4
-    if elo_points <= 1500: return 5
-    if elo_points <= 1750: return 6
-    if elo_points <= 2000: return 7
-    if elo_points <= 2300: return 8
-    if elo_points <= 2600: return 9
-    return 10
+    @classmethod
+    def calculate_team_match(cls, team_ct_elo: list[int], team_t_elo: list[int], winner: str):
+        avg_ct = sum(team_ct_elo) / len(team_ct_elo)
+        avg_t = sum(team_t_elo) / len(team_t_elo)
+
+        match winner:
+            case "CT":
+                new_ct, new_t = cls._elo_system.rate_1vs1(avg_ct, avg_t)
+            case "T":
+                new_t, new_ct = cls._elo_system.rate_1vs1(avg_t, avg_ct)
+            case _:
+                return None
+
+        return round(new_ct - avg_ct), round(new_t - avg_t)
 
 if __name__ == "__main__":
-    p1, p2 = 1000, 1000
-    new_p1, new_p2 = calculate_new_ranks(p1, p2)
-    print(new_p1, new_p2)
-    print(get_rank_level(new_p1))
+    ct_team = [1000, 1050, 980, 1020, 1100]
+    t_team = [1000, 950, 1010, 990, 1050]
+
+    service = PeekitMatchService()
+    
+    ct_change, t_change = service.calculate_team_match(ct_team, t_team, "CT")
+    
+    print(f"CT Change: {ct_change:+}")
+    print(f"T Change: {t_change:+}")
+    print(f"Rank for 1450 Elo: {service.get_rank_level(1450)}")
